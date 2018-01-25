@@ -65,7 +65,7 @@ void Centerline::CapSurface(vtkPolyData* inputSurface, vtkPolyData* cappedSurfac
 
 	// calculate centerlines of lumen and vessl outer wall
 	vtkSmartPointer<vtkvmtkCapPolyData> capper = vtkSmartPointer<vtkvmtkCapPolyData>::New();
-	capper->SetInputData(inputSurface);
+	capper->SetInput(inputSurface);
 	capper->Update();
 	cappedSurface->DeepCopy(capper->GetOutput());
 	CapCenterIds->DeepCopy(capper->GetCapCenterIds());
@@ -79,7 +79,7 @@ void Centerline::Update()
 void Centerline::CalculateCenterline()
 {
 	vtkSmartPointer<vtkvmtkPolyDataCenterlines> centerlinesFilter = vtkSmartPointer<vtkvmtkPolyDataCenterlines>::New();
-	centerlinesFilter->SetInputData(m_cappedSurface);
+	centerlinesFilter->SetInput(m_cappedSurface);
 	centerlinesFilter->SetSourceSeedIds(m_sourceIds);
 	centerlinesFilter->SetTargetSeedIds(m_targetIds);
 	centerlinesFilter->SetAppendEndPointsToCenterlines(m_appendEndPointsFlag);

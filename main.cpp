@@ -64,13 +64,13 @@ int WriteCenterline(vtkPolyData* centerline, string centerlinePath)
 
 		// compute centerline attribute, geometry and branch splitting
 		vtkSmartPointer<vtkvmtkCenterlineAttributesFilter> attributeFilter = vtkSmartPointer<vtkvmtkCenterlineAttributesFilter>::New();
-		attributeFilter->SetInputData(centerline);
+		attributeFilter->SetInput(centerline);
 		attributeFilter->SetParallelTransportNormalsArrayName("ParallelTransportNormals");
 		attributeFilter->SetAbscissasArrayName("Abscissas");
 		attributeFilter->Update();
 
 		vtkSmartPointer<vtkvmtkCenterlineGeometry> geometryFilter = vtkSmartPointer<vtkvmtkCenterlineGeometry>::New();
-		geometryFilter->SetInputData(attributeFilter->GetOutput());
+		geometryFilter->SetInput(attributeFilter->GetOutput());
 		geometryFilter->SetFrenetBinormalArrayName("FrenetBinormal");
 		geometryFilter->SetFrenetNormalArrayName("FrenetNormal");
 		geometryFilter->SetFrenetTangentArrayName("FrenetTangent");
@@ -85,7 +85,7 @@ int WriteCenterline(vtkPolyData* centerline, string centerlinePath)
 		geometryFilter->Update();
 
 		vtkSmartPointer<vtkvmtkCenterlineBranchExtractor> branchExtractor = vtkSmartPointer<vtkvmtkCenterlineBranchExtractor>::New();
-		branchExtractor->SetInputData(geometryFilter->GetOutput());
+		branchExtractor->SetInput(geometryFilter->GetOutput());
 		branchExtractor->SetRadiusArrayName("Radius");
 		branchExtractor->SetCenterlineIdsArrayName("CenterlineIds");
 		branchExtractor->SetGroupIdsArrayName("GroupIds");
@@ -111,7 +111,7 @@ int WriteCenterline(vtkPolyData* centerline, string centerlinePath)
 		//	branchGeometry->Update();
 
 		vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
-		writer->SetInputData(branchExtractor->GetOutput());
+		writer->SetInput(branchExtractor->GetOutput());
 		writer->SetFileName(centerlinePath.c_str());
 		writer->Write();
 		cout << "Successfully write the centerline polydata file" << endl;
@@ -161,11 +161,11 @@ int ReadSurface(string surfacePath, vtkPolyData* surface)
 
 	// preprocess the surface
 	vtkSmartPointer<vtkCleanPolyData>surfaceCleaner = vtkSmartPointer<vtkCleanPolyData>::New();
-	surfaceCleaner->SetInputData(surface);
+	surfaceCleaner->SetInput(surface);
 	surfaceCleaner->Update();
 
 	vtkSmartPointer < vtkTriangleFilter> surfaceTriangulator = vtkSmartPointer<vtkTriangleFilter>::New();
-	surfaceTriangulator->SetInputConnection(surfaceCleaner->GetOutputPort());
+	surfaceTriangulator->SetInput(surfaceCleaner->GetOutput());
 	surfaceTriangulator->PassLinesOff();
 	surfaceTriangulator->PassVertsOff();
 	surfaceTriangulator->Update();
@@ -187,15 +187,15 @@ int ExtractCenterline(string surfacePath, vtkPolyData* inputSurface, vtkPolyData
 		{
 			// capping
 			vtkSmartPointer<vtkvmtkCapPolyData> capper = vtkSmartPointer<vtkvmtkCapPolyData>::New();
-			capper->SetInputData(inputSurface);
+			capper->SetInput(inputSurface);
 			capper->Update();
 
 			vtkSmartPointer<vtkCleanPolyData> cleaner = vtkSmartPointer<vtkCleanPolyData>::New();
-			cleaner->SetInputData(capper->GetOutput());
+			cleaner->SetInput(capper->GetOutput());
 			cleaner->Update();
 			
 			vtkSmartPointer<vtkTriangleFilter> triangulator = vtkSmartPointer<vtkTriangleFilter>::New();
-			triangulator->SetInputData(cleaner->GetOutput());
+			triangulator->SetInput(cleaner->GetOutput());
 			triangulator->PassLinesOff();
 			triangulator->PassVertsOff();
 			triangulator->Update();
@@ -203,12 +203,12 @@ int ExtractCenterline(string surfacePath, vtkPolyData* inputSurface, vtkPolyData
 			cappedSurface->DeepCopy(triangulator->GetOutput());			
 
 			vtkSmartPointer<vtkPolyDataMapper> surfaceMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-			surfaceMapper->SetInputData(cappedSurface);
+			surfaceMapper->SetInput(cappedSurface);
 			vtkSmartPointer<vtkActor> surfaceActor = vtkSmartPointer<vtkActor>::New();
 			surfaceActor->SetMapper(surfaceMapper);
 
 			vtkSmartPointer<vtkPolyDataMapper> centerlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-			centerlineMapper->SetInputData(centerline);
+			centerlineMapper->SetInput(centerline);
 			vtkSmartPointer<vtkActor> centerlineActor = vtkSmartPointer<vtkActor>::New();
 			centerlineActor->SetMapper(centerlineMapper);
 
@@ -260,7 +260,7 @@ int WriteCappedSurface(vtkPolyData* cappedSurface, string writePath)
 {
 	vtkSmartPointer<vtkSTLWriter> writer = vtkSmartPointer<vtkSTLWriter>::New();
 	writer->SetFileName(writePath.c_str());
-	writer->SetInputData(cappedSurface);
+	writer->SetInput(cappedSurface);
 	writer->Write();
 	cout << "Successfully write the capped surface file"<<endl;
 	return 1;
